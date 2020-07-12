@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLPolls API Docs</title>
+    <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+<div class="stackedit__left">
+    <div class="stackedit__toc">
+
+        <ul>
+            <li><a href="#hamsterlabs-polls-api-dokumentation">
+                HamsterLab’s Polls API Dokumentation</a>
+                <ul>
+                    <li><a href="#hauptendpunkt">Hauptendpunkt</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#standalone-benutzung">Standalone-Benutzung</a></li>
+                    <li><a href="#endpunkte">Endpunkte</a></li>
+                    <li><a href="#get-polls">GET /polls</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#get-pollsid">GET /polls/:id</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#post-polls">POST /polls</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#patch-pollsidvotes">PATCH /polls/:id/votes</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#del-pollsidvotes">DEL /polls/:id/votes</a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#del-pollsidtokentoken">DEL /polls/:id?token=<token></a>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                    <li><a href="#das-poll-objekt">Das Poll-Objekt</a></li>
+                    <li><a href="#das-validation-error-objekt">Das Validation-Error Objekt</a></li>
+                    <li><a href="#api-nutzungsrichtlinien">API Nutzungsrichtlinien</a></li>
+                </ul>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<div class="stackedit__right">
+    <div class="stackedit__html">
+        <h1 id="hamsterlabs-polls-api-dokumentation">HamsterLab’s Polls API Dokumentation</h1>
+        <p>HamsterLab’s Polls bietet eine komplette Web-API um auf Basis dieser Plattform<br>
+            Integrationen, Bots und andere Software bauen zu können.<br>
+            Bitte beachte die Punkte unter <strong>Standalone-Benutzung</strong> und die <strong>API Nutzungsrichtlinien</strong></p>
+        <p>Diese Dokumentation ist gültig für die Version <strong>1.0</strong> der API.</p>
+        <h2 id="hauptendpunkt">Hauptendpunkt</h2>
+        <h4 id="httpspolls.hamsterlabs.deapi"><code>https://polls.hamsterlabs.de/api</code></h4>
+        <p>Alle Daten werden im <strong>JSON Format</strong> bereitgestellt und empfangen.</p>
+        <h2 id="standalone-benutzung">Standalone-Benutzung</h2>
+        <p>Die API ist standardmäßig darauf ausgelegt, Benutzer wiederzuerkennen, um z.b. zu wissen, wer schon wo abgestimmt hat oder nicht.<br>
+            Dies wird mithilfe von Fingerprints (hashes der IPs und Browser-Headern) umgesetzt.<br>
+            Dafür muss die API direkt Clientseitig angesprochen werden.<br>
+            Sollte sie Serverseitig benutzt werden, führt das zu Fehlern, da nun dauerhaft ein Fingerprint<br>
+            deiner Anwendung benutzt wird, welcher logischerweise immer derselbe ist, da alle Requests von deinem Server stammen.</p>
+        <p>Genau dafür gibt es den <strong>Standalone-Modus</strong> der API.<br>
+            In dem wird kein oder ein von dir bei jeder Anfrage selbst geschickter eindeutiger Fingerprint verwendet.</p>
+        <h3 id="benutzung-des-standalone-modus">Benutzung des Standalone-Modus</h3>
+        <p>Hierfür müssten custom HTTP Header in jeder Request mitgegeben werden:<br>
+            <code>Standalone-API: true</code><br>
+            <code>Custom-Id: &lt;string&gt;</code></p>
+        <p>Der Custom-Id Header kann einen beliebigen String enthalten, den du in deiner Anwendung frei wählen kannst.<br>
+            Dieser sollte eindeutig sein und dazu dienen, deine Benutzer zu identifizieren und zuzuordnen.<br>
+            Dies kann zum Beispiel bei einem ChatBot die UserId des Chat-Benutzers sein.</p>
+        <h2 id="endpunkte">Endpunkte</h2>
+        <h2 id="get-polls">GET <code>/polls</code></h2>
+        <p>Gibt die Übersicht der Startseite, aufgeteielt in <em>recent</em> (neuste Abstimmmungen) und <em>popular</em> (am meisten gesehene Abstimmungen), zurück.</p>
+        <h4 id="rückgabedaten">Rückgabedaten:</h4>
+        <ul>
+            <li><strong>200: OK</strong></li>
+        </ul>
+        <pre><code>{
+  "recent": Array[poll], 
+  "popular": Array[poll] 
+} 
+</code></pre>
+        <h2 id="get-pollsid">GET <code>/polls/:id</code></h2>
+        <p>Ruft eine Abstimmung auf Basis ihrer id ab.</p>
+        <h4 id="url-parameter">URL Parameter:</h4>
+        <ul>
+            <li><code>id</code> Die eindeutige id der Abstimmung (<a href="http://poll.id">poll.id</a>)</li>
+        </ul>
+        <h4 id="rückgabedaten-1">Rückgabedaten:</h4>
+        <ul>
+            <li>
+                <p><strong>200: OK</strong><br>
+                    <code>Poll-Objekt</code> (Siehe “Das Poll-Objekt”)</p>
+            </li>
+            <li>
+                <p><strong>404: Not found</strong><br>
+                    <code>{ "error": "not_found" }</code></p>
+            </li>
+        </ul>
+        <h2 id="post-polls">POST <code>/polls</code></h2>
+        <p>Zum erstellen einer neuen Umfrage</p>
+        <h4 id="post-daten-json">Post-Daten (JSON):</h4>
+        <pre><code>{
+  "title": string (5-50 Zeichen),
+  "author": string (4-40 Zeichen),
+  "description": string (optional, 30-600 zeichen),
+  "options": Array[string] (2-6 Elemente),
+  "isPublic": bool (Soll öffentlich gelistet werden?),
+  "isMultiple": bool (Mehrere Antworten möglich)
+}  
+</code></pre>
+        <h4 id="rückgabedaten-2">Rückgabedaten:</h4>
+        <ul>
+            <li>
+                <p><strong>200: OK</strong><br>
+                    <code>Poll-Objekt</code> mit dem zusätzlichen Feld <code>"token": string</code>.<br>
+                    Dieser ist der Schlüssel um eine Abstimmung zu löschen oder administrative Änderungen an einer Abstimmung vorzunehmen.<br>
+                    Der token sollte abgespeichert werden, da er sonst nicht wieder abgerufen werden kann.</p>
+            </li>
+            <li>
+                <p><strong>422: Unprocessable entity</strong><br>
+                    <code>Validation-Error Objekt</code> (Siehe “Das Validation-Error Objekt”)</p>
+            </li>
+        </ul>
+        <h2 id="patch-pollsidvotes">PATCH <code>/polls/:id/votes</code></h2>
+        <p>Endpunkt für das abstimmen für eine/mehrere bestimmte Optionen.</p>
+        <h4 id="url-parameter-1">URL Parameter:</h4>
+        <ul>
+            <li><code>id</code> Die eindeutige id der Abstimmung (<a href="http://poll.id">poll.id</a>)</li>
+        </ul>
+        <h4 id="post-daten-json-1">Post-Daten (JSON):</h4>
+        <pre><code>Array[number]
+</code></pre>
+        <p>Ein Array mit Zahlen, welches die Array-Indexe der jeweiligen Option(en) enthält.</p>
+        <h4 id="rückgabedaten-3">Rückgabedaten:</h4>
+        <ul>
+            <li><strong>200: OK</strong></li>
+            <li><strong>400: Bad request</strong><br>
+                <code>{ "error": "invalid_option" }</code><br>
+                <code>{ error: 'missing_custom_id_header' }</code></li>
+            <li><strong>403: Forbidden</strong><br>
+                <code>{ "error": "already_voted" }</code></li>
+            <li><strong>404: Not found</strong><br>
+                <code>{ "error": "not_found" }</code></li>
+            <li><strong>422: Unprocessable entity</strong><br>
+                <code>Validation-Error Objekt</code> (Siehe “Das Validation-Error Objekt”)</li>
+        </ul>
+        <h2 id="del-pollsidvotes">DEL <code>/polls/:id/votes</code></h2>
+        <p>Entfernt deine Stimme wieder von einer Abstimmung an der du teilgenommen hast.</p>
+        <h4 id="url-parameter-2">URL Parameter:</h4>
+        <ul>
+            <li><code>id</code> Die eindeutige id der Abstimmung (<a href="http://poll.id">poll.id</a>)</li>
+        </ul>
+        <h4 id="rückgabedaten-4">Rückgabedaten:</h4>
+        <ul>
+            <li><strong>200: OK</strong></li>
+            <li><strong>400: Bad request</strong><br>
+                <code>{ "error": 'missing_custom_id_header' }</code></li>
+            <li><strong>403: Forbidden</strong><br>
+                <code>{ "error": "not_voted" }</code></li>
+            <li><strong>404: Not found</strong><br>
+                <code>{ "error": "not_found" }</code></li>
+        </ul>
+        <h2 id="del-pollsidtokentoken">DEL <code>/polls/:id?token=&lt;token&gt;</code></h2>
+        <p>Löscht eine Abstimmung unwiederruflich.</p>
+        <h4 id="url-parameter-3">URL Parameter:</h4>
+        <ul>
+            <li><code>id</code> Die eindeutige id der Abstimmung (<a href="http://poll.id">poll.id</a>)</li>
+            <li><code>&lt;token&gt;</code> Der token den man dei der erstellung der Abstimmung erhalten hat.</li>
+        </ul>
+        <h4 id="rückgabedaten-5">Rückgabedaten:</h4>
+        <ul>
+            <li><strong>200: OK</strong></li>
+            <li><strong>403: Forbidden</strong><br>
+                <code>{ "error": "not_voted" }</code></li>
+            <li><strong>404: Not found</strong><br>
+                <code>{ "error": "not_found" }</code></li>
+        </ul>
+        <h2 id="das-poll-objekt">Das Poll-Objekt</h2>
+        <pre><code>{
+  "id": string,
+  "title": string,
+  "author": string,
+  "creationDate": ISODateTime,
+  "options": Array[string],
+  "description": string|null,
+  "isPublic": bool,
+  "isMultiple": bool,
+  "voted": bool (optional),
+  "views": number,
+  "totalVotes": number,
+  "votes": Array[number]
+}  
+</code></pre>
+        <h2 id="das-validation-error-objekt">Das Validation-Error Objekt</h2>
+        <pre><code>{
+  "error": "validation_error",
+  "problems": { 
+  "field": { 
+    "value": string,
+    "msg": string,
+    "param": string,
+    "location": string 
+  }, 
+  ... 
+} 
+</code></pre>
+        <h2 id="api-nutzungsrichtlinien">API Nutzungsrichtlinien</h2>
+        <ol>
+            <li>
+                <p>Das Ausnutzen der API ist untersagt. Dazu zählt:</p>
+                <ul>
+                    <li>Spam.</li>
+                    <li>Vollständig autonome Bots die ausschließlich maschinengenerierten Inhalt produzieren.</li>
+                    <li>Das erstellen von Fakedaten und/oder Daten mit rechtswidrigen oder unangemessenen Inhalten.</li>
+                    <li>Das Bereitstellen von Zugriff auf die API durch Dritte.</li>
+                </ul>
+            </li>
+            <li>
+                <p>Hinweise für deine Anwendung bei Verwendung unserer API:</p>
+                <ul>
+                    <li>Achte auf seriösität und Benutzerfreundlichkeit</li>
+                    <li>Stelle nützliche und sinnvolle Funktionen und Implementationen bereit.</li>
+                </ul>
+            </li>
+        </ol>
+
+    </div>
+</div>
+</body>
+
+</html>
